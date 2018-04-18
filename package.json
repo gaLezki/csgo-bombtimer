@@ -1,0 +1,27 @@
+{
+  "name": "csgo-bombtimer",
+  "version": "1.0.0",
+  "description": "Bombtimer for CSGO",
+  "main": "bombtimer.js",
+  "dependencies": {
+    "socket.io": "^2.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gaLezki/csgo-bombtimer.git"
+  },
+  "keywords": [
+    "csgo",
+    "bombtimer"
+  ],
+  "author": "gaLezki",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gaLezki/csgo-bombtimer/issues"
+  },
+  "homepage": "https://github.com/gaLezki/csgo-bombtimer#readme"
+}

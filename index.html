@@ -1,0 +1,85 @@
+<html>
+<head>
+	<script src='http://127.0.0.1:3000/socket.io/socket.io.js'></script>
+</head>
+<body>
+	<canvas id="fuse" width="1920" height="5" style="background-color:transparent"></canvas>
+	<script>
+		var c = document.getElementById("fuse");
+		var ctx = c.getContext("2d");
+
+		// Things under your control
+		c.width = 1920; // Use your OBS canvas width for this, most likely 1920
+		c.height = 5; // If 5 pixels is not enough, you can adjust it here
+		var colorfade = 1; // Change this if you want the timer to be red only
+
+		// Initiations
+		var socket = io('http://127.0.0.1:3000');
+		var bombTimerInterval;
+		var defuseFadeInterval;
+		var startingpoint = 0;
+		var rgb_green = 255;
+		var length = c.width;
+		var step = c.width / 1600; // How many pixels you remove from both ends of the fuse in every interval
+
+		// This function is executed 20 times in a second, resulting in overall of 800 executions if bomb timer is 40 seconds
+		function bombTimer() {
+			ctx.globalAlpha = 1;
+			ctx.clearRect(0, 0, c.width, c.height);
+			startingpoint += step; // Move the starting point of drawing
+			length -= 2*step; // Shorten the fuse from both ends
+
+			if (colorfade == 1)
+			{
+				rgb_green -= 0.32;
+				ctx.fillStyle = 'rgb(255,' + Math.round(rgb_green) + ',0)'; // Start as yellow, slowly fades to red before the explosion
+			} 
+			else 
+				ctx.fillStyle = 'rgb(255,0,0)';
+				
+			ctx.fillRect(startingpoint,0,length,c.height);
+			// Check if it's time for explosion, kill the interval and clear the canvas
+			if (length <= 0) { 
+				clearInterval(bombTimerInterval);
+				ctx.clearRect(0, 0, c.width, c.height);
+			}
+		}
+		// Green fade effect that is used if the bomb is defused
+		// This function is executed 20 times in a second, fading the green out in about 2+ seconds
+		function defuseFade() {
+			ctx.globalAlpha -= 0.02; // fading speed
+			ctx.clearRect(0, 0, c.width, c.height);
+			ctx.fillStyle = 'green';
+			ctx.fillRect(0,0,c.width,c.height);
+			if (ctx.globalAlpha <= 0.02)
+			{
+				ctx.clearRect(0, 0, c.width, c.height);
+				clearInterval(defuseFadeInterval);				
+			}
+		}
+		socket.on('bomb_planted', function(data){
+			startingpoint = 0;
+			length = c.width;
+			rgb_green = 255;
+			ctx.fillStyle = 'rgb(255,255,0)';
+			ctx.fillRect(0,0,c.width, c.height);
+			bombTimer();
+			bombTimerInterval = setInterval(bombTimer,50);
+		});
+		
+		// This occurs if the bomb has been planted but terrorists win the round before it explodes
+		socket.on('round_over', function(data){
+			clearInterval(bombTimerInterval);
+			ctx.clearRect(0, 0, c.width, c.height);
+		});
+
+		socket.on('bomb_defused', function(data){
+			clearInterval(bombTimerInterval);
+			ctx.clearRect(0, 0, c.width, c.height);
+			ctx.fillStyle = 'green';
+			ctx.fillRect(0,0,c.width, c.height);
+			defuseFadeInterval = setInterval(defuseFade,50);
+		});
+		
+	</script>
+</body>

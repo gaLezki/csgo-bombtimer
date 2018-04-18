@@ -1,0 +1,11 @@
+bomb plant
+  
+curl -H "Content-Type: application/json" -X POST -d '{ "provider": { "name": "Counter-Strike: Global Offensive", "appid": 730, "version": 13631, "steamid": "", "timestamp": 1524066980 }, "round": { "phase": "live", "bomb": "planted" }, "added": { "round": { "bomb": true } } }' 127.0.0.1:3000
+
+ct defuses the bomb
+  
+curl -H "Content-Type: application/json" -X POST -d '{ "provider": { "name": "Counter-Strike: Global Offensive", "appid": 730, "version": 13631, "steamid": "", "timestamp": 1524067126 }, "round": { "phase": "over", "win_team": "CT", "bomb": "defused" }, "previously": { "round": { "phase": "live", "bomb": "planted" } }, "added": { "round": { "win_team": true } } }' 127.0.0.1:3000
+
+CTs die before the bomb explodes
+  
+curl -H "Content-Type: application/json" -X POST -d '{ "provider": { "name": "Counter-Strike: Global Offensive", "appid": 730, "version": 13631, "steamid": "", "timestamp": 1524067201 }, "round": { "phase": "over", "win_team": "T" }, "previously": { "round": { "phase": "live", "bomb": "planted" } }, "added": { "round": { "win_team": true } } }' 127.0.0.1:3000

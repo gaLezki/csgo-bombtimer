@@ -14,6 +14,14 @@ app = http.createServer(function(req, res) {
             res.end('');
         });
     }
+    else if (req.url === "/dummy")
+    {
+        fs.readFile("dummy.html", function(err, data){
+            res.writeHead(200, {'Content-Type': 'text/html', 'Access-Control-Allow-Origin':'*'});
+            res.write(data);
+            res.end('');
+        });
+    }
     else
     {
         res.writeHead(200, {'Content-Type': 'text/html'});

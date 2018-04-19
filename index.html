@@ -58,6 +58,7 @@
 			}
 		}
 		socket.on('bomb_planted', function(data){
+			clearInterval(defuseFadeInterval); 
 			startingpoint = 0;
 			length = c.width;
 			rgb_green = 255;

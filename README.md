@@ -69,9 +69,10 @@ Copy the gamestate\_integration\_bombtimer.cfg to your cfg folder
 
 You can test this with the following options:
 
-1. Use the dummy data provided by either using curl or POSTMAN or whatever
-2. Go to a random server with GOTV and hope that they plant the bomb.
-3. Play yourself against bots or players and keep in mind that if you are **playing** instead of being a spectator, **the game will send the bomb plant message with a random delay**.
+1. Use the dummy page http://127.0.0.1:3000/dummy
+2. Use the dummy data provided by either using curl or POSTMAN or whatever
+3. Go to a random server with GOTV and hope that they plant the bomb.
+4. Play yourself against bots or players and keep in mind that if you are **playing** instead of being a spectator, **the game will send the bomb plant message with a random delay**.
 
 If you want to test this with a real browser instead of Browser source of OBS, use URL http://127.0.0.1:3000/test in your browser.
 

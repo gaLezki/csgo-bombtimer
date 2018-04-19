@@ -33,12 +33,19 @@ function processPayload(data) {
     var date = new Date(data.provider.timestamp * 1000),
     output = '';
 
+    if (_socket === undefined)
+    {
+        output += 'No connection to the browser source! Please check that Browser source is open in your OBS.';
+    }
+        
     // Handlings for the bomb plant events
-    if (readProperty(data, 'added.round.bomb') === true)
+    else if (readProperty(data, 'added.round.bomb') === true)
     {
         output += 'The bomb has been planted!';
         _socket.emit('bomb_planted');
-    } else if (readProperty(data, 'previously.round.bomb') === "planted") {
+    } 
+    else if (readProperty(data, 'previously.round.bomb') === "planted") 
+    {
         if (readProperty(data, 'round.phase') === "over" && readProperty(data, 'round.win_team') === "CT")
         {
             output += 'The bomb has been defused!';

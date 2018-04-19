@@ -73,8 +73,6 @@ You can test this with the following options:
 2. Go to a random server with GOTV and hope that they plant the bomb.
 3. Play yourself against bots or players and keep in mind that if you are **playing** instead of being a spectator, **the game will send the bomb plant message with a random delay**. 
 
-## Problems
+## Problems?
 
-**Q**: bombtimer.js crashes with error "TypeError: Cannot read property 'emit' of undefined"?
-
-**A**: Open the Browser source in your OBS before you start posting either dummy data or real data from CSGO.
+Ask me if you have any. My DM is open on Twitter and Reddit.

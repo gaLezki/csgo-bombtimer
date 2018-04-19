@@ -1,22 +1,36 @@
 var http = require('http');
+var fs = require("fs");
+
 var _socket;
 
 port = 3000;
 host = '127.0.0.1';
 app = http.createServer(function(req, res) {
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    var eventInfo = '';
+    if (req.url === "/test")
+    {
+        fs.readFile("index.html", function(err, data){
+            res.writeHead(200, {'Content-Type': 'text/html', 'Access-Control-Allow-Origin':'*'});
+            res.write(data);
+            res.end('');
+        });
+    }
+    else
+    {
+        res.writeHead(200, {'Content-Type': 'text/html'});
+        var eventInfo = '';
 
-    req.on('data', function (data) {
-        eventInfo += processPayload(JSON.parse(data.toString()));
-    });
+        req.on('data', function (data) {
+            eventInfo += processPayload(JSON.parse(data.toString()));
+        });
 
-    req.on('end', function () {
-        if (eventInfo !== '') {
-            console.log(eventInfo);
-        }
-        res.end('');
-    });
+        req.on('end', function () {
+            if (eventInfo !== '') {
+                console.log(eventInfo);
+            }
+            res.end('');
+        });
+    }
+    
 });
 io = require('socket.io')(app);
 io.on('connection', function (socket) {

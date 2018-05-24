@@ -34,7 +34,7 @@ The default settings are made for 1920 width canvas. If you have larger or small
 
 4. After installation is done:
 
-    **nodejs bombtimer.js**
+    **node bombtimer.js**
 
 5. Do the OBS stuff
 

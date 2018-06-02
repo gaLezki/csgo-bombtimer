@@ -4,6 +4,7 @@
 </head>
 <body>
 	<canvas id="fuse" width="1920" height="5" style="background-color:transparent"></canvas>
+	<div id="defusetimer"></div>
 	<script>
 		var c = document.getElementById("fuse");
 		var ctx = c.getContext("2d");
@@ -17,6 +18,7 @@
 		var socket = io('http://127.0.0.1:3000');
 		var bombTimerInterval;
 		var defuseFadeInterval;
+		var defuseTimeleft = "";
 		var startingpoint = 0;
 		var rgb_green = 255;
 		var length = c.width;
@@ -72,6 +74,14 @@
 		socket.on('round_over', function(data){
 			clearInterval(bombTimerInterval);
 			ctx.clearRect(0, 0, c.width, c.height);
+		});
+
+		socket.on('defusing_started', function(data){
+			defuseTimeleft = data;
+			document.getElementById("defusetimer").innerHTML = data;
+		});
+		socket.on('defusing_stopped', function(data){
+			document.getElementById("defusetimer").innerHTML = "";
 		});
 
 		socket.on('bomb_defused', function(data){

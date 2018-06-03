@@ -4,10 +4,12 @@
 </head>
 <body>
 	<canvas id="fuse" width="1920" height="5" style="background-color:transparent"></canvas>
-	<div id="defusetimer"></div>
+	<canvas id="defuse" width="1920" height="5" style="background-color:transparent"></canvas>
 	<script>
 		var c = document.getElementById("fuse");
 		var ctx = c.getContext("2d");
+		var c_def = document.getElementById("defuse");
+		var ctx_def = c_def.getContext("2d");
 
 		// Things under your control
 		c.width = 1920; // Use your OBS canvas width for this, most likely 1920
@@ -18,11 +20,16 @@
 		var socket = io('http://127.0.0.1:3000');
 		var bombTimerInterval;
 		var defuseFadeInterval;
-		var defuseTimeleft = "";
 		var startingpoint = 0;
 		var rgb_green = 255;
 		var length = c.width;
 		var step = c.width / 1600; // How many pixels you remove from both ends of the fuse in every interval
+
+		// Initiations for defuse line
+		var defuseTimeleft = 0;
+		var MAX_LENGTH_DEF = Math.floor(c_def.width / 400) * 100;
+		var length_def = 0;
+		var startingpoint_def = (c_def.width - MAX_LENGTH_DEF) / 2;
 
 		// This function is executed 20 times in a second, resulting in overall of 800 executions if bomb timer is 40 seconds
 		function bombTimer() {
@@ -77,11 +84,16 @@
 		});
 
 		socket.on('defusing_started', function(data){
-			defuseTimeleft = data;
-			document.getElementById("defusetimer").innerHTML = data;
+			ctx_def.clearRect(0, 0, c_def.width, c_def.height);
+			defuseTimeleft = data * 1000; // I don't like floats
+			var length_def = Math.round((defuseTimeleft / 10000) * MAX_LENGTH_DEF);
+			startingpoint_def = Math.round((c_def.width - length_def) / 2);
+			// ctx_def.fillStyle = 'rgb(93,121,174)';
+			ctx_def.fillStyle = 'blue'
+			ctx_def.fillRect(startingpoint_def,0,length_def,c_def.height);
 		});
 		socket.on('defusing_stopped', function(data){
-			document.getElementById("defusetimer").innerHTML = "";
+			ctx_def.clearRect(0, 0, c_def.width, c_def.height);
 		});
 
 		socket.on('bomb_defused', function(data){

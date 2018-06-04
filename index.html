@@ -27,9 +27,9 @@
 
 		// Initiations for defuse line
 		var defuseTimeleft = 0;
-		var MAX_LENGTH_DEF = Math.floor(c_def.width / 400) * 100;
+		var MAX_LENGTH_DEF = Math.floor(c_def.width / 100) * 100;
 		var length_def = 0;
-		var startingpoint_def = (c_def.width - MAX_LENGTH_DEF) / 2;
+		var startingpoint_def = 0;
 
 		// This function is executed 20 times in a second, resulting in overall of 800 executions if bomb timer is 40 seconds
 		function bombTimer() {
@@ -87,9 +87,9 @@
 			ctx_def.clearRect(0, 0, c_def.width, c_def.height);
 			defuseTimeleft = data * 1000; // I don't like floats
 			var length_def = Math.round((defuseTimeleft / 10000) * MAX_LENGTH_DEF);
-			startingpoint_def = Math.round((c_def.width - length_def) / 2);
+			startingpoint_def = Math.round((MAX_LENGTH_DEF - length_def) / 2);
 			// ctx_def.fillStyle = 'rgb(93,121,174)';
-			ctx_def.fillStyle = 'blue'
+			ctx_def.fillStyle = 'deepskyblue';
 			ctx_def.fillRect(startingpoint_def,0,length_def,c_def.height);
 		});
 		socket.on('defusing_stopped', function(data){

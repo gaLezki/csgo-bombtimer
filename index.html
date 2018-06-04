@@ -28,8 +28,10 @@
 		// Initiations for defuse line
 		var defuseTimeleft = 0;
 		var MAX_LENGTH_DEF = Math.floor(c_def.width / 100) * 100;
+		var step_def = MAX_LENGTH_DEF / 100;
 		var length_def = 0;
 		var startingpoint_def = 0;
+		var smoothDefuseInterval;
 
 		// This function is executed 20 times in a second, resulting in overall of 800 executions if bomb timer is 40 seconds
 		function bombTimer() {
@@ -66,6 +68,14 @@
 				clearInterval(defuseFadeInterval);				
 			}
 		}
+
+		function smoothDefuse()
+		{
+			ctx_def.clearRect(0, 0, c_def.width, c_def.height);
+			ctx_def.fillRect(startingpoint_def + Math.round(step_def / 4),0,length_def - Math.round(step_def / 2),c_def.height);
+			clearInterval(smoothDefuseInterval);
+			
+		}
 		socket.on('bomb_planted', function(data){
 			clearInterval(defuseFadeInterval); 
 			startingpoint = 0;
@@ -85,14 +95,18 @@
 
 		socket.on('defusing_started', function(data){
 			ctx_def.clearRect(0, 0, c_def.width, c_def.height);
+			clearInterval(smoothDefuseInterval);
 			defuseTimeleft = data * 1000; // I don't like floats
-			var length_def = Math.round((defuseTimeleft / 10000) * MAX_LENGTH_DEF);
+			length_def = Math.round((defuseTimeleft / 10000) * MAX_LENGTH_DEF);
 			startingpoint_def = Math.round((MAX_LENGTH_DEF - length_def) / 2);
 			// ctx_def.fillStyle = 'rgb(93,121,174)';
 			ctx_def.fillStyle = 'deepskyblue';
 			ctx_def.fillRect(startingpoint_def,0,length_def,c_def.height);
+			smoothDefuseInterval = setInterval(smoothDefuse,50);
+			
 		});
 		socket.on('defusing_stopped', function(data){
+			clearInterval(smoothDefuseInterval);
 			ctx_def.clearRect(0, 0, c_def.width, c_def.height);
 		});
 

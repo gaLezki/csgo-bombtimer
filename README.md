@@ -46,7 +46,7 @@ Check **Local file**, browser the folder and select **index.html**
 
 Width: **1920**
 
-Height: **5**
+Height: **1080**
 
 Custom CSS:
 

@@ -27,11 +27,12 @@
 
 		// Initiations for defuse line
 		var defuseTimeleft = 0;
-		var MAX_LENGTH_DEF = Math.floor(c_def.width / 100) * 100;
-		var step_def = MAX_LENGTH_DEF / 100;
+		var MAX_LENGTH_DEF = c_def.width;
+		var step_def = MAX_LENGTH_DEF / 400;
 		var length_def = 0;
 		var startingpoint_def = 0;
 		var smoothDefuseInterval;
+		var defusing = 0;
 
 		// This function is executed 20 times in a second, resulting in overall of 800 executions if bomb timer is 40 seconds
 		function bombTimer() {
@@ -50,7 +51,7 @@
 				
 			ctx.fillRect(startingpoint,0,length,c.height);
 			// Check if it's time for explosion, kill the interval and clear the canvas
-			if (length <= 0) { 
+			if (length <= 0) {
 				clearInterval(bombTimerInterval);
 				ctx.clearRect(0, 0, c.width, c.height);
 			}
@@ -72,8 +73,13 @@
 		function smoothDefuse()
 		{
 			ctx_def.clearRect(0, 0, c_def.width, c_def.height);
-			ctx_def.fillRect(startingpoint_def + Math.round(step_def / 4),0,length_def - Math.round(step_def / 2),c_def.height);
-			clearInterval(smoothDefuseInterval);
+			startingpoint_def += step_def;
+			length_def -= 2* step_def;
+			ctx_def.fillRect(startingpoint_def,0,length_def,c_def.height);
+			if (length_def <= 0) {
+				clearInterval(smoothDefuseInterval);
+				ctx_def.clearRect(0, 0, c_def.width, c_def.height);
+			}
 			
 		}
 		socket.on('bomb_planted', function(data){
@@ -83,7 +89,6 @@
 			rgb_green = 255;
 			ctx.fillStyle = 'rgb(255,255,0)';
 			ctx.fillRect(0,0,c.width, c.height);
-			bombTimer();
 			bombTimerInterval = setInterval(bombTimer,50);
 		});
 		
@@ -94,12 +99,12 @@
 		});
 
 		socket.on('defusing_started', function(data){
+			if (defusing) return;
+			defusing = 1;
 			ctx_def.clearRect(0, 0, c_def.width, c_def.height);
-			clearInterval(smoothDefuseInterval);
 			defuseTimeleft = data * 1000; // I don't like floats
 			length_def = Math.round((defuseTimeleft / 10000) * MAX_LENGTH_DEF);
 			startingpoint_def = Math.round((MAX_LENGTH_DEF - length_def) / 2);
-			// ctx_def.fillStyle = 'rgb(93,121,174)';
 			ctx_def.fillStyle = 'deepskyblue';
 			ctx_def.fillRect(startingpoint_def,0,length_def,c_def.height);
 			smoothDefuseInterval = setInterval(smoothDefuse,50);
@@ -107,6 +112,7 @@
 		});
 		socket.on('defusing_stopped', function(data){
 			clearInterval(smoothDefuseInterval);
+			defusing = 0;
 			ctx_def.clearRect(0, 0, c_def.width, c_def.height);
 		});
 

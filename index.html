@@ -4,9 +4,12 @@
 </head>
 <body>
 	<canvas id="fuse" width="1920" height="5" style="background-color:transparent"></canvas>
+	<canvas id="defuse" width="1920" height="5" style="background-color:transparent"></canvas>
 	<script>
 		var c = document.getElementById("fuse");
 		var ctx = c.getContext("2d");
+		var c_def = document.getElementById("defuse");
+		var ctx_def = c_def.getContext("2d");
 
 		// Things under your control
 		c.width = 1920; // Use your OBS canvas width for this, most likely 1920
@@ -21,6 +24,15 @@
 		var rgb_green = 255;
 		var length = c.width;
 		var step = c.width / 1600; // How many pixels you remove from both ends of the fuse in every interval
+
+		// Initiations for defuse line
+		var defuseTimeleft = 0;
+		var MAX_LENGTH_DEF = c_def.width;
+		var step_def = MAX_LENGTH_DEF / 400;
+		var length_def = 0;
+		var startingpoint_def = 0;
+		var smoothDefuseInterval;
+		var defusing = 0;
 
 		// This function is executed 20 times in a second, resulting in overall of 800 executions if bomb timer is 40 seconds
 		function bombTimer() {
@@ -39,7 +51,7 @@
 				
 			ctx.fillRect(startingpoint,0,length,c.height);
 			// Check if it's time for explosion, kill the interval and clear the canvas
-			if (length <= 0) { 
+			if (length <= 0) {
 				clearInterval(bombTimerInterval);
 				ctx.clearRect(0, 0, c.width, c.height);
 			}
@@ -57,6 +69,19 @@
 				clearInterval(defuseFadeInterval);				
 			}
 		}
+
+		function smoothDefuse()
+		{
+			ctx_def.clearRect(0, 0, c_def.width, c_def.height);
+			startingpoint_def += step_def;
+			length_def -= 2* step_def;
+			ctx_def.fillRect(startingpoint_def,0,length_def,c_def.height);
+			if (length_def <= 0) {
+				clearInterval(smoothDefuseInterval);
+				ctx_def.clearRect(0, 0, c_def.width, c_def.height);
+			}
+			
+		}
 		socket.on('bomb_planted', function(data){
 			clearInterval(defuseFadeInterval); 
 			startingpoint = 0;
@@ -64,7 +89,6 @@
 			rgb_green = 255;
 			ctx.fillStyle = 'rgb(255,255,0)';
 			ctx.fillRect(0,0,c.width, c.height);
-			bombTimer();
 			bombTimerInterval = setInterval(bombTimer,50);
 		});
 		
@@ -72,6 +96,24 @@
 		socket.on('round_over', function(data){
 			clearInterval(bombTimerInterval);
 			ctx.clearRect(0, 0, c.width, c.height);
+		});
+
+		socket.on('defusing_started', function(data){
+			if (defusing) return;
+			defusing = 1;
+			ctx_def.clearRect(0, 0, c_def.width, c_def.height);
+			defuseTimeleft = data * 1000; // I don't like floats
+			length_def = Math.round((defuseTimeleft / 10000) * MAX_LENGTH_DEF);
+			startingpoint_def = Math.round((MAX_LENGTH_DEF - length_def) / 2);
+			ctx_def.fillStyle = 'deepskyblue';
+			ctx_def.fillRect(startingpoint_def,0,length_def,c_def.height);
+			smoothDefuseInterval = setInterval(smoothDefuse,50);
+			
+		});
+		socket.on('defusing_stopped', function(data){
+			clearInterval(smoothDefuseInterval);
+			defusing = 0;
+			ctx_def.clearRect(0, 0, c_def.width, c_def.height);
 		});
 
 		socket.on('bomb_defused', function(data){

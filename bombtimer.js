@@ -58,10 +58,31 @@ function processPayload(data) {
     if (_socket === undefined)
     {
         output += 'No connection to the browser source! Please check that Browser source is open in your OBS.';
+        return output;
+    }
+
+    current_phase = {
+        name: readProperty(data, 'phase_countdowns.phase'),
+        timeleft: readProperty(data, 'phase_countdowns.phase_ends_in')
+    };
+    previous_phase = {
+        name: readProperty(data, 'previously.phase_countdowns.phase'),
+        timeleft: readProperty(data, 'previously.phase_countdowns.phase_ends_in')
+    };
+
+    if (current_phase.name == "defuse")
+    {
+        console.log(current_phase.timeleft);
+        _socket.emit('defusing_started',current_phase.timeleft);
+    }
+    else if (previous_phase.name == "defuse" && current_phase.name !== "defuse")
+    {
+        console.log("Ended defuse");
+        _socket.emit('defusing_stopped');
     }
         
     // Handlings for the bomb plant events
-    else if (readProperty(data, 'added.round.bomb') === true)
+    if (readProperty(data, 'added.round.bomb') === true)
     {
         output += 'The bomb has been planted!';
         _socket.emit('bomb_planted');

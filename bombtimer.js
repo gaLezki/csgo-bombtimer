@@ -72,7 +72,6 @@ function processPayload(data) {
 
     if (current_phase.name == "defuse")
     {
-        console.log(current_phase.timeleft);
         _socket.emit('defusing_started',current_phase.timeleft);
     }
     else if (previous_phase.name == "defuse" && current_phase.name !== "defuse")

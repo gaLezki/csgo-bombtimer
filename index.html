@@ -3,69 +3,90 @@
 	<script src='http://127.0.0.1:3000/socket.io/socket.io.js'></script>
 </head>
 <body>
-	<canvas id="fuse" width="1920" height="5" style="background-color:transparent"></canvas>
+	<canvas id="bomb" width="1920" height="5" style="background-color:transparent"></canvas>
 	<canvas id="defuse" width="1920" height="5" style="background-color:transparent"></canvas>
 	<script>
-		var c = document.getElementById("fuse");
-		var ctx = c.getContext("2d");
+		var c_bomb = document.getElementById("bomb");
+		var ctx_bomb = c_bomb.getContext("2d");
 		var c_def = document.getElementById("defuse");
 		var ctx_def = c_def.getContext("2d");
 
 		// Things under your control
-		c.width = 1920; // Use your OBS canvas width for this, most likely 1920
-		c.height = 5; // If 5 pixels is not enough, you can adjust it here
+
+		// Use your OBS canvas width for these, most likely 1920
+		c_bomb.width = 1920; 
+		c_def.width = 1920; 
+
+		// If 5 pixels is not enough, you can adjust heights here
+		c_bomb.height = 5; 
+		c_def.height = 5;
+
 		var colorfade = 1; // Change this if you want the timer to be red only
+
+		// Lengths of actual timers, preferably lengths that won't cause any floats to maintain stable movement
+		var MAX_LENGTH_BOMB = 1600; 
+		var MAX_LENGTH_DEF = 1600;
 
 		// Initiations
 		var socket = io('http://127.0.0.1:3000');
 		var bombTimerInterval;
 		var defuseFadeInterval;
-		var startingpoint = 0;
-		var rgb_green = 255;
-		var length = c.width;
-		var step = c.width / 1600; // How many pixels you remove from both ends of the fuse in every interval
+		
+		var MAX_STARTINGPOINT_BOMB = Math.round((c_bomb.width - MAX_LENGTH_DEF) / 2);
+		var MAX_GREEN = 255;
+
+		var length_bomb = MAX_LENGTH_BOMB;		
+		var startingpoint_bomb = MAX_STARTINGPOINT_BOMB;
+		var rgb_green = MAX_GREEN;
+
+		var ticks_bomb = 40000 / 50; // Fuse is shortened every 50 milliseconds during 40000 milliseconds
+		var step_bomb = (MAX_LENGTH_BOMB / ticks_bomb) / 2; // How many pixels you remove from both ends of the fuse in every interval
 
 		// Initiations for defuse line
 		var defuseTimeleft = 0;
-		var MAX_LENGTH_DEF = 1900;
-		var step_def = MAX_LENGTH_DEF / 400;
-		var length_def = 0;
-		var startingpoint_def = 0;
+		var MAX_STARTINGPOINT_DEF = Math.round((c_def.width - MAX_LENGTH_DEF) / 2);
+		var ticks_def = 10000 / 50; // Fuse is shortened every 50 milliseconds during (theoretically) 10000 milliseconds
+		var step_def = (MAX_LENGTH_DEF / ticks_def) / 2; // How many pixels you remove from both ends of the fuse in every interval
+
+		// Overwritten by timeleft value given by game state integration
+		var length_def = 1600;
+		var startingpoint_def = 160; 
+		
 		var smoothDefuseInterval;
 		var defusing = 0;
 
 		// This function is executed 20 times in a second, resulting in overall of 800 executions if bomb timer is 40 seconds
 		function bombTimer() {
-			ctx.globalAlpha = 1;
-			ctx.clearRect(0, 0, c.width, c.height);
-			startingpoint += step; // Move the starting point of drawing
-			length -= 2*step; // Shorten the fuse from both ends
+			ctx_bomb.globalAlpha = 1;
+			ctx_bomb.clearRect(0, 0, c_bomb.width, c_bomb.height);
+			startingpoint_bomb += step_bomb; // Move the starting point of drawing
+			length_bomb -= 2*step_bomb; // Shorten the fuse from both ends
 
 			if (colorfade == 1)
 			{
 				rgb_green -= 0.32;
-				ctx.fillStyle = 'rgb(255,' + Math.round(rgb_green) + ',0)'; // Start as yellow, slowly fades to red before the explosion
+				ctx_bomb.fillStyle = 'rgb(255,' + Math.round(rgb_green) + ',0)'; // Start as yellow, slowly fades to red before the explosion
 			} 
 			else 
-				ctx.fillStyle = 'rgb(255,0,0)';
+				ctx_bomb.fillStyle = 'rgb(255,0,0)';
 				
-			ctx.fillRect(startingpoint,0,length,c.height);
+			ctx_bomb.fillRect(startingpoint_bomb,0,length_bomb,c_bomb.height);
 			// Check if it's time for explosion, kill the interval and clear the canvas
-			if (length <= 0) {
+			if (length_bomb <= 0) {
 				clearInterval(bombTimerInterval);
-				ctx.clearRect(0, 0, c.width, c.height);
+				ctx_bomb.clearRect(0, 0, c_bomb.width, c_bomb.height);
 			}
 		}
 		// Green fade effect that is used if the bomb is defused
 		// This function is executed 20 times in a second, fading the green out in about 2+ seconds
 		function defuseFade() {
-			ctx.globalAlpha -= 0.02; // fading speed
-			ctx.clearRect(0, 0, c.width, c.height);
-			ctx.fillStyle = 'green';
-			ctx.fillRect(0,0,c.width,c.height);
-			if (ctx.globalAlpha <= 0.02)
+			ctx_bomb.globalAlpha -= 0.02; // fading speed
+			ctx_bomb.clearRect(0, 0, c_bomb.width, c_bomb.height);
+			ctx_bomb.fillStyle = 'green';
+			ctx_bomb.fillRect(0,0,c_bomb.width,c_bomb.height);
+			if (ctx_bomb.globalAlpha <= 0.02)
 			{
-				ctx.clearRect(0, 0, c.width, c.height);
+				ctx_bomb.clearRect(0, 0, c_bomb.width, c_bomb.height);
 				clearInterval(defuseFadeInterval);				
 			}
 		}
@@ -84,27 +105,27 @@
 		}
 		socket.on('bomb_planted', function(data){
 			clearInterval(defuseFadeInterval); 
-			startingpoint = 0;
-			length = c.width;
-			rgb_green = 255;
-			ctx.fillStyle = 'rgb(255,255,0)';
-			ctx.fillRect(0,0,c.width, c.height);
+			startingpoint_bomb = MAX_STARTINGPOINT_BOMB;
+			length_bomb = MAX_LENGTH_BOMB;
+			rgb_green = MAX_GREEN;
+			ctx_bomb.fillStyle = 'rgb(255,255,0)';
+			ctx_bomb.fillRect(startingpoint_bomb,0,length_bomb, c_bomb.height);
 			bombTimerInterval = setInterval(bombTimer,50);
 		});
 		
 		// This occurs if the bomb has been planted but terrorists win the round before it explodes
 		socket.on('round_over', function(data){
 			clearInterval(bombTimerInterval);
-			ctx.clearRect(0, 0, c.width, c.height);
+			ctx_bomb.clearRect(0, 0, c_bomb.width, c_bomb.height);
 		});
 
 		socket.on('defusing_started', function(data){
 			if (defusing) return;
 			defusing = 1;
 			ctx_def.clearRect(0, 0, c_def.width, c_def.height);
-			defuseTimeleft = data * 1000; // I don't like floats
+			defuseTimeleft = Math.round(data * 1000); // I don't like floats
 			length_def = Math.round((defuseTimeleft / 10000) * MAX_LENGTH_DEF);
-			startingpoint_def = Math.round((MAX_LENGTH_DEF - length_def) / 2);
+			startingpoint_def = Math.round(MAX_STARTINGPOINT_DEF + Math.round(MAX_LENGTH_DEF / 2) - Math.round(length_def / 2));
 			ctx_def.fillStyle = 'deepskyblue';
 			ctx_def.fillRect(startingpoint_def,0,length_def,c_def.height);
 			smoothDefuseInterval = setInterval(smoothDefuse,50);
@@ -118,9 +139,9 @@
 
 		socket.on('bomb_defused', function(data){
 			clearInterval(bombTimerInterval);
-			ctx.clearRect(0, 0, c.width, c.height);
-			ctx.fillStyle = 'green';
-			ctx.fillRect(0,0,c.width, c.height);
+			ctx_bomb.clearRect(0, 0, c_bomb.width, c_bomb.height);
+			ctx_bomb.fillStyle = 'green';
+			ctx_bomb.fillRect(0,0,c_bomb.width, c_bomb.height);
 			defuseFadeInterval = setInterval(defuseFade,50);
 		});
 		

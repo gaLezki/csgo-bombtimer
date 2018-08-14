@@ -10,19 +10,19 @@ And to be honest this is also a some kind of rip-off from one of the huds that P
 
 # The looks
 
-It's basically a thin line in the top of the screen that starts to shrink from both ends. During the process it changes color from yellow to red. 
+It's basically a thin line in the top of the screen that starts to shrink from both ends. During the process it changes color from yellow to red. Defuse line is blue.
 
-Examples:
+Examples (outdated, I'll update these at some point):
 
  - [Bomb goes all the way and explodes](https://youtu.be/AEmutqfrvfQ?t=318)
  - [Terrorists kill the remaining CTs before the bomb explodes](https://youtu.be/AEmutqfrvfQ?t=616)
- - [CTs defuse the bomb](https://youtu.be/AEmutqfrvfQ?t=1017)
+ - [CTs defuse the bomb](https://www.youtube.com/watch?v=irMnz-U4nCs)
 
 You can choose to keep it red (PGL style) the whole time by changing **colorfade** variable in index.html to 0.
 
 # Instructions
 
-The default settings are made for 1920 width canvas. If you have larger or smaller resolution than Full HD you can switch the width and height in the index.html by modifying **c.width** and **c.height**.
+The default settings are made for 1920 width canvas. If you have larger or smaller resolution than Full HD you can switch the width and height in the index.html by modifying **c_bomb.width**, **c_bomb.height**, **c_def.width** and **c_def.width**. If you have the Full HD canvas but want to change the length you can do it by changing **MAX_LENGTH_BOMB** and **MAX_LENGTH_DEF**.
 
 ## Nodejs
 
